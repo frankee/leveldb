@@ -1075,8 +1075,21 @@ int64_t DBImpl::TEST_MaxNextLevelOverlappingBytes() {
 }
 
 Status DBImpl::Get(const ReadOptions& options,
+                   std::string* key,
+                   std::string* value) {
+  return Get(options, *key, value, key);
+}
+
+Status DBImpl::Get(const ReadOptions& options,
                    const Slice& key,
                    std::string* value) {
+  return Get(options, key, value, NULL);
+}
+
+Status DBImpl::Get(const ReadOptions& options,
+                   const Slice& key,
+                   std::string* value,
+                   std::string* stored_key) {
   Status s;
   MutexLock l(&mutex_);
   SequenceNumber snapshot;
@@ -1101,12 +1114,12 @@ Status DBImpl::Get(const ReadOptions& options,
     mutex_.Unlock();
     // First look in the memtable, then in the immutable memtable (if any).
     LookupKey lkey(key, snapshot);
-    if (mem->Get(lkey, value, &s)) {
+    if (mem->Get(lkey, value, &s, stored_key)) {
       // Done
-    } else if (imm != NULL && imm->Get(lkey, value, &s)) {
+    } else if (imm != NULL && imm->Get(lkey, value, &s, stored_key)) {
       // Done
     } else {
-      s = current->Get(options, lkey, value, &stats);
+      s = current->Get(options, lkey, value, &stats, stored_key);
       have_stat_update = true;
     }
     mutex_.Lock();

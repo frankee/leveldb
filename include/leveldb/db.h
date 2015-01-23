@@ -83,6 +83,19 @@ class DB {
   virtual Status Get(const ReadOptions& options,
                      const Slice& key, std::string* value) = 0;
 
+  // If the database contains an entry for "key" store the
+  // corresponding value in *value and return OK.
+  //
+  // If there is no entry for "key" leave *value unchanged and return
+  // a status for which Status::IsNotFound() returns true.
+  //
+  // May return some other Status on an error.
+  // 
+  // will reset the meta data of the key
+  virtual Status Get(const ReadOptions& options,
+                     std::string* key,
+                     std::string* value) = 0;
+
   // Return a heap-allocated iterator over the contents of the database.
   // The result of NewIterator() is initially invalid (caller must
   // call one of the Seek methods on the iterator before using it).
