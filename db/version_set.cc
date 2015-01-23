@@ -267,7 +267,7 @@ static void SaveValue(void* arg, const Slice& ikey, const Slice& v) {
       s->state = (parsed_key.type == kTypeValue) ? kFound : kDeleted;
       if (s->state == kFound) {
         s->value->assign(v.data(), v.size());
-        if (key) {
+        if (s->key) {
           s->key->assign(parsed_key.user_key.data(), parsed_key.user_key.size());
         }
       }
